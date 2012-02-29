@@ -1,0 +1,131 @@
+---
+#
+# A sketch of a web form with submit handler.
+# Written in an imaginary language that is a mix of YAML+Jekyll and ideas from Lisp,Scheme,JavaScript,Tcl.
+#
+#   I imagine this module and its functions having such structure (mappings + body):
+#
+#   +===+=========+
+#   +---+---------+
+#   +---+---------+
+#   +---+---------+
+#   |             |
+#   |             |
+#   +=============+
+#
+#   Couple things added to YAML:
+#
+#       - Function calls: lines starting with "* " (don't mix with values "*varname").
+#       - Aliases are added automaticly for mapping keys.
+#
+#   Function calls can be wrapped by adding ":" at the end of line:
+#
+#       * fn-name arg1 arg2 arg3 ...
+#
+#   can be written:
+#
+#       * fn-name arg1 arg2:
+#           - arg3
+#           - ...
+# 
+#   Mappings inside function body work like "var x = ..." statements in JavaScript:
+#       - they add a mapping to the function and create a statement setting the value for the mapping.
+#
+#   "assume" function checks the first argument and evalues the rest if it is false.
+#
+#   "e" function is similar to <http://www.astro.princeton.edu/~rhl/Tcl-Tk_docs/tcl/expr.n.html>:
+#       It lets one use infix notation inside prefix-notation code.
+#
+#   This example assumes a web framework that maps HTTP requests to the module body or appropriate methods.
+#
+#
+
+##
+#   Vars like in Jekyll:
+#
+layout: default
+title:  Simple form
+
+##
+#   This function would be called for HTTP POST request by some web framework:
+#
+POST:
+    * fn [request]:
+
+        record:   *request.POST
+        errors: 
+            * validate *record:
+                name:   Please enter your name.
+                email:  Please enter your email.
+        
+        * assume (e *errors.length == 0):
+            * redirect GET:
+                error:  "Please fix these errors:"
+                errors: *errors
+                record: *record
+            * exit
+
+        * assume:
+            * *storage.write false *record
+            * log error *page.url POST "Error saving record" *record
+            * redirect GET:
+                error:  Server error when saving your data.
+                record: *record
+            * exit
+                
+        * redirect GET:
+            message:    Record saved.
+            
+##
+#   Creates a mapping "result" for keys in mapping "mapping" that do not have values.
+#
+validate:
+    * fn [mapping, errors]:
+        result: {}
+        * for k in *mapping:
+            * assume *mapping[*k]
+                * set result[*k] *errors[*k]
+        *result
+
+
+##
+#   Wrapps an Sqlite DB table in an ObjectFS API.
+#   For more details see:   <http://objectfs.org/docs/storage-wrapper.html> 
+#   
+storage:
+    * (require objectfs).connect db.sqlite#records
+    
+
+credits:
+    - http://jekyllrb.com/
+    - http://glenncase.com/music/glenncase/12-glenn_case_-_a_quick_simple_form.mp3
+   
+---
+<h1>{{ title }}</h1>
+
+{% if *request.error %}
+    <div class="alert error">{{ request.error }}</div>
+{% end if %}
+{% if *request.message %}
+    <div class="alert info">{{ request.message }}</div>
+{% end if %}
+
+<form action="">
+    <div>
+        <label>name</label>
+        <input name="name" value="{{ record.name }}">
+        {% if *request.errors.name %}
+            <span>{{ request.errors.name }}</span>
+        {% end if %}
+    </div>
+    <div>
+        <label>email</label>
+        <input name="email" value="{{ record.email }}">
+        {% if *request.errors.email %}
+            <span>{{ request.errors.email }}</span>
+        {% end if %}
+    </div>
+    <div>
+        <input type="submit">
+    </div>
+</form>
