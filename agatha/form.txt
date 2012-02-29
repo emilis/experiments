@@ -47,6 +47,14 @@ layout: default
 title:  Simple form
 
 ##
+#   A little less magic and a little more consistency: "config" is used explicitly instead of predefined "site" like in Jekyll.
+#
+#   This also shows the inline function call syntax.
+#   Unlike in lisps only the first item in the list is looked up in a mapping table. Others are used as values.
+#
+config: (require config)
+
+##
 #   This function would be called for HTTP POST request by some web framework:
 #
 POST:
@@ -83,7 +91,7 @@ validate:
     * fn [mapping, errors]:
         result: {}
         * for k in *mapping:
-            * assume *mapping[*k]
+            * if-not *mapping[*k]
                 * set result[*k] *errors[*k]
         *result
 
@@ -99,7 +107,19 @@ storage:
 credits:
     - http://jekyllrb.com/
     - http://glenncase.com/music/glenncase/12-glenn_case_-_a_quick_simple_form.mp3
-   
+
+
+# 
+#   The part below would be interpreted as an embedded version of the language.
+#
+#   "{{ varname }}" should output the value of the variable.
+#
+#   "{% fn-name ... %}" is interpreted as a function call. Text after this block is interpreted as an argument to the function.
+#
+#       Thus "{% end x %}" is just an instruction to close a function call (it may ignore x).
+#
+#   Unlike in Jekyll there is no "page.*" namespace. All module variables are accessible directly.
+#
 ---
 <h1>{{ title }}</h1>
 
