@@ -1,0 +1,231 @@
+Possible parse output from full.sup
+
+--------------------------------------------------------------------------------
+
+var page =          page || {};
+var page_css =      page.css || "";
+var page_js =       page.js || false;
+var language =      page.language || "en";
+var title =         page.title || "Untitled document";
+var page_image =    page.image || false;
+
+var timestamp =     ( new Date ).getTime().toString( 36 );
+
+return [
+{   name:   "!DOCTYPE",
+    attr:   { html: null }},
+{   name:   "html",
+    attr:   { lang: escape( language )}
+    cont:[
+    {   name:   "head",
+        cont:[
+        {   name:   "meta",
+            attr:   { charset: "utf8" }},
+        {   name:   "meta",
+            attr:   { name: "viewport", content: "width=device-width, initial-scale=1.0" }},
+        runBlock(function( print ){
+            if( page_image ){
+                print([{
+                    name:   "meta",
+                    attr:   { property: "og:image", content: escape( page_image )}}]);
+            }}),
+        {   name:   "title",
+            cont:   [ escape( title  )]},
+        {   name:   "link",
+            attr:   { rel: "stylesheet", href: "/static/style.css?"+escape( timestamp ) }},
+        {   name:   "script",
+            attr:   { async: "async", defer: "defer",
+                        src: "/static/script.js?"+escape( timestamp )}},
+        {   name:   "style",
+            attr:   { type: "text/css" },
+            cont:   [ page_css ]},
+    ]},
+    {   name:   "body",
+        cont:[
+            content,
+            {   name:   "script",
+                cont:[  "document.body.htmlDone = ..... event );" ]},
+            runBlock(function( print ){
+                if( page_js ){
+                    print([{
+                        name:   "script",
+                        cont:[
+                            "(function(){",
+                            page_js,
+                            "})();"]}]);
+                }
+            })]},
+    ]}
+]
+
+ -------------------------------------------------------------------------------
+
+{   name:   "div",
+    attr:   { class: escape( CLASSNAME  )},
+    cont:[
+    {   name:   "div",
+        attr:   { class: "editor active" },
+        cont:[  editor ]},
+    {   name:   "div",
+        attr:   { class: "viewer" },
+        cont:[  viewer ]},
+    ]}
+
+ -------------------------------------------------------------------------------
+
+{   name:   "textarea",
+    attr:   { class: escape( CLASSNAME )},
+    cont:[  escape( value )]}
+
+ -------------------------------------------------------------------------------
+
+{   name:   "div",
+    attr:   { class: escape( CLASSNAME ) + "-container" },
+    cont:[
+    {   name:   "textarea",
+        attr:   { class: escape( CLASSNAME ) },
+        cont:[  escape( value )]}
+    ]}
+
+-------------------------------------------------------------------------------
+
+{   name:   "div",
+    attr:   { class: escape( CLASSNAME )},
+    cont:[
+    {   name:   "a",
+        attr:   { class: "logo", href: "/" },
+        cont:[
+        {   name:   "img",
+            attr:   { title: "MPCat.org", alt: "MPCat.org", src: "/static/mpcat.org-vertical-white.png" }},
+        ]},
+    {   name:   "menu",
+        attr:   { class: "primary" },
+        cont:[
+        {   name:   "button",
+            attr:   { class: "edit hide" },
+            cont:[  "«Ed" ]},
+        {   name:   "button",
+            attr:   { class: "run " },
+            cont:[
+                "R",
+                {   name:   "span",
+                    attr:   { class: "onwide" },
+                    cont:[  "un" ]},
+                "»",
+                {   name:   "small",
+                    attr:   { class: "onwide" },
+                    cont:[  "F9" ]},
+            ]},
+        {   name:   "button",
+            attr:   { class: "toggle" },
+            cont:[  "&equiv;" ]},
+        ]},
+    {   name:   "menu",
+        attr:   { class: "secondary" },
+        cont:[
+        {   name:   "button",
+            attr:   { class: "share" },
+            cont:[  "Share" ]},
+        {   name:   "a",
+            attr:   { class: "about", href: "/about" },
+            cont:[  "About" ]},
+        ]},
+    ]}
+
+--------------------------------------------------------------------------------
+
+{   name:   "div",
+    attr:   { class: escape( CLASSNAME )},
+    cont:[
+    {   name:   "p",
+        cont:[
+        {   name:   "em",
+            cont:[  "Click [Run»] to update output..." ]},
+        ]},
+    ]}
+
+--------------------------------------------------------------------------------
+
+{   name:   "div",
+    attr:   { class: escape( CLASSNAME )},
+    cont:[
+    {   name:   "div",
+        attr:   { class: "menu" },
+        cont:[  menu ]},
+    {   name:   "div",
+        attr:   { class: "cards" },
+        cont:[  cards({
+            editor:     editor({
+                value:  mpcExample,
+            }),
+            viewer:     viewer(),
+            })]},
+    ]}
+
+--------------------------------------------------------------------------------
+
+{   name:   "header",
+    attr:   { class: escape( CLASSNAME )},
+    cont:[
+    {   name:   "a",
+        attr:   { href: "/" },
+        cont:[
+        {   name:   "img",
+            attr:   { class: "logo", title: "MPCat.org", alt: "MPCat.org", src: "/static/mpcat.org-white.png" }}
+        ]},
+    {   name:   "menu",
+        attr:   { class: "settings" },
+        cont:[
+        {   name:   "a",
+            attr:   { href: "/about" },
+            cont:   [ "About" ]},
+        "<!--\n<button.settings Settings\n-->",
+        ]}
+    ]}
+
+--------------------------------------------------------------------------------
+
+[
+    header,
+    {   name:   "main",
+        attr:   { class: escape( CLASSNAME )},
+        cont:[
+        {   name:   "article",
+            cont:[  content ]},
+        ]},
+]
+
+--------------------------------------------------------------------------------
+
+function unindent( str ){
+
+    return str.replace( /^    /gm, "" );
+}
+
+return [
+    ide({ mpcExample: unindent( mpcExample )}),
+    ];
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+[{  name:   "ul",
+    cont:[
+    (function(){
+        var children = [
+            function( obj ){ with( obj ){
+                return [{
+                    name:   "li",
+                    cont:[
+                    {   name:   "a",
+                        attr:   { href: '"'+escape( permalink )+'"' },
+                        cont:[  escape( title ) ]}
+                    ]}
+                ];
+            }}
+        ];
+        var firstChild =    children[0];
+
+        return pages.map( firstChild );
+    })()
+]}];

@@ -1,0 +1,198 @@
+An exporessive AND readable syntax for producing DOM trees / HTML from templates with embedded JavaScript and Markdown.
+
+--------------------------------------------------------------------------------
+
+{::
+
+var page                page || {}
+var page_css            page.css || ""
+var page_js             page.js || false
+
+var language            page.language || "en"
+var title               page.title || "Untitled document"
+var page_image          page.image || false
+
+var timestamp           ( new Date ).getTime().toString( 36 )
+
+:}
+<!DOCTYPE( html )
+<html( lang {:language:} )
+
+    <head
+        <meta( charset utf8 )
+        <meta( name viewport,
+            content "width=device-width, initial-scale=1.0" )
+        {:= page_image ? firstChild() : null :}
+            <meta( property og:image, content {:page_image:} )
+
+        <title {:title:}
+        
+        <link( rel stylesheet,
+            href        /static/style.css?{:timestamp:} )
+        <script( async  async, defer  defer,
+            src         /static/script.js?{:timestamp:} )
+        <style( type text/css )
+            {:= page_css :}
+
+    <body
+
+        {:= content :}
+
+        <script
+            document.body.htmlDone =    true;
+            var event = document.createEvent( "Event" );
+            event.initEvent( "html-done", true, true );
+            document.dispatchEvent( event );
+
+        {:= page_js ? firstChild() : null :}
+            <script
+                (function(){
+                    {:= page_js :}
+                })();
+
+--------------------------------------------------------------------------------
+
+<div.{:CLASSNAME:}
+    <div.editor.active  {:= editor :}
+    <div.viewer         {:= viewer :}
+
+--------------------------------------------------------------------------------
+
+<textarea.{:CLASSNAME:}    {:value:}
+
+--------------------------------------------------------------------------------
+
+<div.{:CLASSNAME:}-container
+    
+    <textarea.{:CLASSNAME:} {:value:}
+
+--------------------------------------------------------------------------------
+
+<div.{:CLASSNAME:}
+
+    <a.logo( href / )
+        <img(
+            title MPCat.org, alt MPCat.org,
+            src     /static/mpcat.org-vertical-white.png
+
+    <menu.primary
+        <button.edit.hide   «Ed
+        <button.run
+            R<span.onwide un>»<small.onwide F9>
+        <button.toggle      &equiv;
+
+    <menu.secondary
+        <button.share       Share
+        <a.about( href /about/ )    About
+
+--------------------------------------------------------------------------------
+
+<div.{:CLASSNAME:}
+
+    _Click [Run»] to update output..._
+
+--------------------------------------------------------------------------------
+
+<div.{:CLASSNAME:}
+
+    <div.menu       {:= menu :}
+
+    <div.cards
+        
+        {:= cards({
+            editor:     editor({
+                value:  mpcExample,
+            }),
+            viewer:     viewer(),
+            })
+        :}
+
+--------------------------------------------------------------------------------
+
+<header.{:CLASSNAME:}
+    <a( href / )
+        <img.logo( title: MPCat.org, alt: MPCat.org,
+            src:    /static/mpcat.org-white.png )
+
+    <menu.settings
+        <a( href /about )   About
+        <!--
+            <button.settings    Settings
+
+--------------------------------------------------------------------------------
+
+{:= header :}
+
+<main.{:CLASSNAME:}
+    <article    {:= content :}
+
+--------------------------------------------------------------------------------
+
+{:= ide({ mpcExample: unindent( mpcExample )}) :}
+{::
+
+function unindent( str ){
+
+    return str.replace( /^    /gm, "" );
+}
+
+:}
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+<ul
+    {:= pages.map( firstChild ) :}
+        <li
+            <a( href "{:permalink:}" ) {:title:}
+
+--------------------------------------------------------------------------------
+
+<!DOCTYPE( html )>
+<html
+    <body
+        <h2 My CD Collection
+        <table( border 1 )
+            <thead
+                <tr( bgcolor #9acd32 )
+                    <th Title
+                    <th Artists
+            <tbody
+                {::
+                    var cds =   select( "catalog/cds" );
+                    if ( !cds || !cds.length ){
+                        return children[0]();
+                    } else {
+                        return cds.map( children[1] );
+                    }
+                :}
+                    <tr.no-cds
+                        <td( colspan 2 )
+                            No CDs found!
+                    <tr
+                        <td {:title:}
+                        <td {:artist:}
+
+--------------------------------------------------------------------------------
+
+<?xml( version 1.0, encoding utf-8 )>
+
+<feed( xmlns http://www.w3.org/2005/Atom )
+
+    <link( href http://emilis.info/atom.xml, rel self )
+    <id         http://emilis.info/
+    <title      Pastabos paraštėse (Emilis.info)
+    <updated    {: (new Date).toISOString() :}
+    <author
+        <name   Emilis Dambauskas
+        <email  emilis.d@gmail.com
+
+    {:= site.posts.slice( 0, 12 ).map( firstChild ) :}
+        <entry
+            <link( href "http://emilis.info{:permalink:}"
+            <id         http://emilis.info{:permalink:}
+            <title      {:title:}
+            <updated    {:date:}
+            <content( type html )
+                {:= escapeCdata( content ) :}
+
